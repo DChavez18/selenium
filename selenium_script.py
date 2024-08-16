@@ -20,11 +20,15 @@ try:
 
     find_table_button.click()
 
+    print("Successfully searched for Oliver's Italian")
+
     restaurant_image = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR, "img[alt=\"A photo of Oliver's Italian restaurant\"]"))
     )
 
     restaurant_image.click()
+
+    print("Successfully clicked on Oliver's Italian")
 
     party_size_dropdown = WebDriverWait(driver, 15).until(
         EC.presence_of_element_located((By.XPATH, "//select[@aria-label='Party size selector']"))
@@ -34,6 +38,12 @@ try:
 
     print("Successfully selected party size")
 
+    date_picker_label = WebDriverWait(driver, 20).until(
+        EC.element_to_be_clickable((By.XPATH, "//div[@data-testid='day-picker-overlay']"))
+    )
+    date_picker_label.click()
+
+    print("Successfully clicked on date picker")
 
 
 finally:
