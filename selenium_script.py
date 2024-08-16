@@ -61,5 +61,13 @@ try:
     select_date.click()
 
     print("Successfully selected the date")
+
+    time_picker = WebDriverWait(driver, 15).until(
+        EC.presence_of_element_located((By.XPATH, "//select[@aria-label='Time selector']"))
+    )
+    select_time = Select(time_picker)
+    select_time.select_by_visible_text("6:30 PM")
+
+    print("Successfully selected time")
 finally:
     driver.quit()
