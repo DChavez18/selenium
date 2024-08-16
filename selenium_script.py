@@ -95,5 +95,12 @@ try:
     driver.execute_script("arguments[0].checked = true;", checkbox)
 
     print("Successfully agreed to the terms and conditions")
+
+    complete_reservation_button = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.ID, "complete-reservation"))
+    )
+    complete_reservation_button.click()
+
+    print("Successfully completed the reservation")
 finally:
     driver.quit()
