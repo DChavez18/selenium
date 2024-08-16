@@ -69,5 +69,19 @@ try:
     select_time.select_by_visible_text("6:30 PM")
 
     print("Successfully selected time")
+
+    confirm_time_button = WebDriverWait(driver, 15).until(
+        EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, 'book/validate')]"))
+    )
+    confirm_time_button.click()
+
+    print("Successfully confirmed the time")
+
+    seating_option_button = WebDriverWait(driver, 15).until(
+        EC.element_to_be_clickable((By.XPATH, "//button[contains(@class, '_3y2jpx-O-d4- rh4f9n3b2Kc- CThPxXrzskE-')]"))
+    )
+    seating_option_button.click()
+
+    print("Successfully selected standard dining room seating")
 finally:
     driver.quit()
