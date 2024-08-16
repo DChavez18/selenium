@@ -45,6 +45,16 @@ try:
 
     print("Successfully clicked on date picker")
 
+    next_month_button = WebDriverWait(driver, 20).until(
+        EC.element_to_be_clickable((By.XPATH, "//button[@aria-label='Next month']"))
+    )
+
+    for _ in range(3):
+        next_month_button.click()
+        time.sleep(1)
+
+    print("Successfully navigated to November")
+
 
 finally:
     driver.quit()
