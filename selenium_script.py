@@ -83,5 +83,17 @@ try:
     seating_option_button.click()
 
     print("Successfully selected standard dining room seating")
+
+    phone_number_input = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "phoneNumber"))
+    )
+    phone_number_input.send_keys("7205057736")
+
+    print("Successfully entered the phone number")
+
+    checkbox = driver.find_element(By.ID, "tcAccepted")
+    driver.execute_script("arguments[0].checked = true;", checkbox)
+
+    print("Successfully agreed to the terms and conditions")
 finally:
     driver.quit()
