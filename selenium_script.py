@@ -55,6 +55,11 @@ try:
 
     print("Successfully navigated to November")
 
+    select_date = WebDriverWait(driver, 15).until(
+        EC.element_to_be_clickable((By.XPATH, "//button[@aria-label='Saturday, November 9']"))
+    )
+    select_date.click()
 
+    print("Successfully selected the date")
 finally:
     driver.quit()
