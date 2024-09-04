@@ -2,10 +2,44 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
+from datetime import datetime
 import time
+import re
 
-reservation_date = input("Please enter the desired reservation date (e.g., 'Friday, November 8, 2024'): ")
-desired_time = input("Please enter the desired reservation time (e.g., '6:30 PM'): ")
+def validate_date(date_string):
+    """Validate the date input to ensure it follows the correct format."""
+    try:
+        # Parse the date to check if it's valid
+        datetime.strptime(date_string, "%A, %B %d, %Y")
+        return True
+    except ValueError:
+        return False
+
+def validate_time(time_string):
+    """Validate the time input to ensure it follows the correct 12-hour format."""
+    try:
+        time_pattern = r"^(1[0-2]|0?[1-9]):([0-5][0-9])\s?(AM|PM|am|pm)$"
+        if re.match(time_pattern, time_string):
+            datetime.strptime(time_string, "%I:%M %p")
+            return True
+        else:
+            return False
+    except ValueError:
+        return False
+
+while True:
+    reservation_date = input("Please enter the desired reservation date (e.g., 'Friday, November 8, 2024'): ")
+    if validate_date(reservation_date):
+        break
+    else:
+        print("Invalid date format. Please try again.")
+
+while True:
+    desired_time = input("Please enter the desired reservation time (e.g., '6:30 PM'): ")
+    if validate_time(desired_time):
+        break
+    else:
+        print("Invalid time format. Please enter the time in H:MM AM/PM format.")
 
 def navigate_to_site(driver, url):
     try:
