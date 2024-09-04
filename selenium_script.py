@@ -4,6 +4,9 @@ from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 import time
 
+reservation_date = input("Please enter the desired reservation date (e.g., 'Friday, November 8, 2024'): ")
+desired_time = input("Please enter the desired reservation time (e.g., '6:30 PM'): ")
+
 def navigate_to_site(driver, url):
     try:
         driver.get(url)
@@ -47,27 +50,63 @@ def select_party_size(driver):
     except Exception as e:
         print(f"Failed to select party size: {e}")
 
-def select_date(driver):
+def select_date(driver, desired_date):
     try:
-        date_picker_label = WebDriverWait(driver, 20).until(
-            EC.element_to_be_clickable((By.XPATH, "//div[@data-testid='day-picker-overlay']"))
+        date_picker_toggle = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//span[@data-test='icDown']"))
         )
-        date_picker_label.click()
+        date_picker_toggle.click()
 
-        next_month_button = WebDriverWait(driver, 20).until(
-            EC.element_to_be_clickable((By.XPATH, "//button[@aria-label='Next month']"))
-        )
+        date_parts = desired_date.split(", ")
+        
+        if len(date_parts) != 3:
+            print(f"Invalid date format. Please input in format 'Friday, November 8, 2024'.")
+            return
 
-        for _ in range(3):
+        target_day = date_parts[1].split(" ")[1] 
+        target_month_year = f"{date_parts[1].split(' ')[0]} {date_parts[2]}"
+        target_aria_label = f"{date_parts[0]}, {date_parts[1]}" 
+
+        max_attempts = 12
+        attempts = 0
+
+        while attempts < max_attempts:
+            displayed_month_year_element = WebDriverWait(driver, 10).until(
+                EC.visibility_of_element_located((By.ID, "react-day-picker-1"))
+            )
+            displayed_month_year = displayed_month_year_element.text
+
+            print(f"Displayed Month-Year: {displayed_month_year}")
+            print(f"Target Month-Year: {target_month_year}")
+
+            if displayed_month_year == target_month_year:
+                print(f"Successfully navigated to {target_month_year}")
+                break
+
+            next_month_button = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, "//span[@data-test='icRight']"))
+            )
             next_month_button.click()
-            time.sleep(1)
+            time.sleep(2) 
 
-        select_date = WebDriverWait(driver, 15).until(
-            EC.element_to_be_clickable((By.XPATH, "//button[@aria-label='Saturday, November 9']"))
-        )
-        select_date.click()
+            attempts += 1
 
-        print("Successfully selected the date")
+        if attempts == max_attempts:
+            print(f"Failed to navigate to {target_month_year}. Max attempts reached.")
+            return
+
+        try:
+            time.sleep(2)
+            select_day = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, f"//button[@aria-label='{target_aria_label}']"))
+            )
+            select_day.click()
+
+            print(f"Successfully selected the date: {desired_date}")
+        except Exception as day_selection_error:
+            print(f"Failed to click on the correct day. Error: {day_selection_error}")
+            return
+
     except Exception as e:
         print(f"Failed to select date: {e}")
 
@@ -77,8 +116,15 @@ def select_time(driver):
             EC.presence_of_element_located((By.XPATH, "//select[@aria-label='Time selector']"))
         )
         select_time = Select(time_picker)
-        select_time.select_by_visible_text("6:30 PM")
-        print("Successfully selected time")
+
+        try:
+            select_time.select_by_visible_text(desired_time)
+            print(f"Successfully selected time: {desired_time}")
+        except:
+            print(f"Desired time {desired_time} not available. Trying to select the first available time.")
+            available_time = time_picker.find_elements(By.TAG_NAME, "option")[1]
+            select_time.select_by_visible_text(available_time.text)
+            print(f"Selected available time: {available_time.text}")
     except Exception as e:
         print(f"Failed to select time: {e}")
 
@@ -130,7 +176,6 @@ def complete_reservation(driver):
     except Exception as e:
         print(f"Failed to complete the reservation: {e}")
 
-# Main execution
 driver = webdriver.Chrome()
 
 try:
@@ -138,7 +183,7 @@ try:
     perform_search(driver)
     select_restaurant(driver)
     select_party_size(driver)
-    select_date(driver)
+    select_date(driver, reservation_date)
     select_time(driver)
     confirm_time(driver)
     select_seating_option(driver)
