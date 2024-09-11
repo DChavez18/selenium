@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
@@ -6,10 +7,37 @@ from datetime import datetime
 import time
 import re
 
+chrome_options = Options()
+chrome_options.add_argument("--headless")
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument("--window-size=1920x1080")
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
+chrome_options.add_argument("--disable-web-security")
+chrome_options.add_argument("--disable-extensions")
+chrome_options.add_argument("--disable-notifications")
+chrome_options.add_argument("--disable-application-cache")
+chrome_options.add_argument("--disable-offline-load-stale-cache")
+chrome_options.add_argument("--disable-infobars")
+chrome_options.add_argument("--disable-browser-side-navigation")
+chrome_options.add_argument("--ignore-certificate-errors")
+chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
+
+
+def check_connectivity(driver):
+    try:
+        driver.get("https://www.google.com")
+        print("Successfully connected to Google.")
+        take_screenshot(driver, "google_check")
+    except Exception as e:
+        print(f"Failed to connect to Google: {e}")
+
+def take_screenshot(driver, name):
+    driver.save_screenshot(f"{name}.png")
+
 def validate_date(date_string):
     """Validate the date input to ensure it follows the correct format."""
     try:
-        # Parse the date to check if it's valid
         datetime.strptime(date_string, "%A, %B %d, %Y")
         return True
     except ValueError:
@@ -50,18 +78,20 @@ def navigate_to_site(driver, url):
 
 def perform_search(driver):
     try:
-        search_bar = WebDriverWait(driver, 10).until(
+        search_bar = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "input[aria-label='Please input a Location, Restaurant or Cuisine']"))
         )
         search_bar.send_keys("Oliver's Italian")
-
-        find_table_button = WebDriverWait(driver, 10).until(
+        time.sleep(2)
+        find_table_button = WebDriverWait(driver, 20).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, "button[aria-label=\"Let’s go\"]"))
         )
         find_table_button.click()
         print("Successfully searched for Oliver's Italian")
+        take_screenshot(driver, "after_search")
     except Exception as e:
         print(f"Failed to perform search: {e}")
+        take_screenshot(driver, "search_failed")
 
 def select_restaurant(driver):
     try:
@@ -210,9 +240,11 @@ def complete_reservation(driver):
     except Exception as e:
         print(f"Failed to complete the reservation: {e}")
 
-driver = webdriver.Chrome()
+driver = webdriver.Chrome(options=chrome_options)
+driver.set_page_load_timeout(30)
 
 try:
+    check_connectivity(driver)
     navigate_to_site(driver, "https://www.opentable.com")
     perform_search(driver)
     select_restaurant(driver)
